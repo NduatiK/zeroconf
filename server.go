@@ -701,7 +701,7 @@ func (s *Server) unicastResponse(resp *dns.Msg, ifIndex int, from net.Addr) erro
 		} else {
 			for _, intf := range s.ifaces {
 				wcm.IfIndex = intf.Index
-				_, err = s.ipv4conn.WriteTo(buf, nil, addr)
+				_, err = s.ipv4conn.WriteTo(buf, &wcm, addr)
 			}
 		}
 		return err
