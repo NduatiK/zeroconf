@@ -694,21 +694,27 @@ func (s *Server) unicastResponse(resp *dns.Msg, ifIndex int, from net.Addr) erro
 	}
 	addr := from.(*net.UDPAddr)
 	if addr.IP.To4() != nil {
+		var wcm ipv4.ControlMessage
 		if ifIndex != 0 {
-			var wcm ipv4.ControlMessage
 			wcm.IfIndex = ifIndex
 			_, err = s.ipv4conn.WriteTo(buf, &wcm, addr)
 		} else {
-			_, err = s.ipv4conn.WriteTo(buf, nil, addr)
+			for _, intf := range s.ifaces {
+				wcm.IfIndex = intf.Index
+				_, err = s.ipv4conn.WriteTo(buf, nil, addr)
+			}
 		}
 		return err
 	} else {
+		var wcm ipv6.ControlMessage
 		if ifIndex != 0 {
-			var wcm ipv6.ControlMessage
 			wcm.IfIndex = ifIndex
 			_, err = s.ipv6conn.WriteTo(buf, &wcm, addr)
 		} else {
-			_, err = s.ipv6conn.WriteTo(buf, nil, addr)
+			for _, intf := range s.ifaces {
+				wcm.IfIndex = intf.Index
+				_, err = s.ipv6conn.WriteTo(buf, &wcm, addr)
+			}
 		}
 		return err
 	}
